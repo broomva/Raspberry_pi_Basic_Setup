@@ -23,11 +23,14 @@ sudo reboot
 ```
 
 ## Autostart scripts
+Use Crontab Pref
 ```
 sudo nano /home/pi/.bashrc
 sudo nano /etc/rc.local
 sudo nano /etc/profile
-crontab
+crontab -e
+ @reboot python3 /home/pi/script.py
+ @reboot sh /home/pi/in.sh
 ```
 
 ## Define Personal Services Exec
@@ -115,9 +118,105 @@ sudo systemctl enable nodered.service
 ```
 Port 1880 default
 
+
+## Install Thingsboard
+```
+sudo apt update
+sudo apt install openjdk-8-jdk
+sudo update-alternatives --config java
+java -version
+# openjdk version "1.8.0.xxx
+
+wget https://github.com/thingsboard/thingsboard/releases/download/v3.0.1/thingsboard-3.0.1.deb
+sudo dpkg -i thingsboard-3.0.1.deb
+
+# Configure PostgreSQL
+# install **wget** if not already installed:
+sudo apt install -y wget
+
+# import the repository signing key:
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+# add repository contents to your system:
+RELEASE=$(lsb_release -cs)
+echo "deb http://apt.postgresql.org/pub/repos/apt/ ${RELEASE}"-pgdg main | sudo tee  /etc/apt/sources.list.d/pgdg.list
+
+# install and launch the postgresql service:
+sudo apt update
+sudo apt -y install postgresql-12
+sudo service postgresql start
+
+sudo su - postgres
+psql
+\password
+\q
+
+psql -U postgres -d postgres -h 127.0.0.1 -W
+CREATE DATABASE thingsboard;
+\q
+
+
+sudo nano /etc/thingsboard/conf/thingsboard.conf
+
+# DB Configuration 
+export DATABASE_ENTITIES_TYPE=sql
+export DATABASE_TS_TYPE=sql
+export SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+export SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver
+export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/thingsboard
+export SPRING_DATASOURCE_USERNAME=postgres
+export SPRING_DATASOURCE_PASSWORD=PUT_YOUR_POSTGRESQL_PASSWORD_HERE
+export SPRING_DATASOURCE_MAXIMUM_POOL_SIZE=5
+# Specify partitioning size for timestamp key-value storage. Allowed values: DAYS, MONTHS, YEARS, INDEFINITE.
+export SQL_POSTGRES_TS_KV_PARTITIONING=MONTHS
+
+# Update ThingsBoard memory usage and restrict it to 256MB in /etc/thingsboard/conf/thingsboard.conf
+export JAVA_OPTS="$JAVA_OPTS -Xms256M -Xmx256M"
+
+
+
+sudo nano /etc/thingsboard/conf/thingsboard.yml
+Comment ‘# HSQLDB DAO Configuration’ block.
+Uncomment ‘# PostgreSQL DAO Configuration’ block. Be sure to update the postgres databases username and password in the bottom two lines of the block (here, as shown, they are both “postgres”).
+
+Change MQTT port to 1882
+
+```
+
+
+
+
 ## Install Docker
 ```
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh 
+```
+
+## Install Thingsboard Docker
+```
+docker run -it -p 9090:9090 -p 1883:1883 -p 5683:5683/udp -v ~/.mytb-data:/data -v ~/.mytb-logs:/var/logs/thingsboard --name mytb --restart always thingsboard/tb-postgres
+
+docker run -it -p 9090:9090 -p 1882:1883 -p 5683:5683/udp -v ~/.mytb-data:/data -v ~/.mytb-logs:/var/logs/thingsboard --name HomeHubTB --restart always thingsboard/tb-postgres
+
+$ docker attach mytb
+
+To stop the container:
+
+$ docker stop mytb
+
+To start the container:
+
+$ docker start mytb
+
+
+Upgrading
+In order to update to the latest image, execute the following commands:
+
+$ docker pull thingsboard/tb-postgres
+$ docker stop mytb
+$ docker run -it -v ~/.mytb-data:/data --rm thingsboard/tb-postgres upgrade-tb.sh
+$ docker rm mytb
+$ docker run -it -p 9090:9090 -p 1883:1883 -p 5683:5683/udp -v ~/.mytb-data:/data -v ~/.mytb-logs:/var/log/thingsboard --name mytb --restart always thingsboard/tb-postgres
+NOTE: replace host's directory ~/.mytb-data with directory used during container creation.
 ```
 
