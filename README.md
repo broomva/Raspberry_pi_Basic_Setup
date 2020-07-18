@@ -1,5 +1,10 @@
 # Raspberry_pi_Basic_Setup
 
+## Change default password and others
+```
+raspi-config
+```
+
 ## Setup Static IP
 
 
@@ -23,7 +28,40 @@ From previous iteration, stpf transfered:
 pip install requirements.txt
 ```
 
+## Install Requirements
+From previous iteration, stpf transfered:
+```
+pip install requirements.txt
+```
 
+## Install Mosquitto MQTT server
+
+```
+sudo apt install -y mosquitto mosquitto-clients
+sudo systemctl enable mosquitto.service
+
+#sudo systemctl restart mosquitto.service
+```
+and add password:
+```
+sudo systemctl stop mosquitto.service
+sudo mosquitto_passwd -c /etc/mosquitto/passwd <user_name>
+# mosquitto_passwd -b passwordfile user password #to change password
+
+sudo nano /etc/mosquitto/mosquitto.conf
+# and add
+password_file /etc/mosquitto/passwd
+allow_anonymous false
+
+mosquitto -c /etc/mosquitto/mosquitto.conf
+#sudo systemctl start mosquitto.service
+```
+
+check on terminal with
+```
+mosquitto_sub -h host -p 1883 -t '#' -u user -P password
+# connects to all topics
+```
 
 ## Installing and Upgrading Node-RED
 ```
