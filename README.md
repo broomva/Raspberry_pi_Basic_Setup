@@ -43,3 +43,10 @@ sudo systemctl enable nodered.service
 # sudo systemctl disable nodered.service
 ```
 Port 1880 default
+
+## Install Docker
+```
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh 
+```
+
