@@ -22,6 +22,14 @@ static domain_name_servers=192.168.0.1
 sudo reboot
 ```
 
+## Autostart scripts
+```
+sudo nano /home/pi/.bashrc
+sudo nano /etc/rc.local
+sudo nano /etc/profile
+crontab
+```
+
 ## Define Personal Services Exec
 ```
 sudo nano /lib/systemd/system/sample.service
@@ -45,7 +53,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable sample.service
 sudo reboot -n
 
-
+```
 
 ## Install Requirements
 From previous iteration, stpf transfered:
