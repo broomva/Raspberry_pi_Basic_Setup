@@ -22,6 +22,31 @@ static domain_name_servers=192.168.0.1
 sudo reboot
 ```
 
+## Define Personal Services Exec
+```
+sudo nano /lib/systemd/system/sample.service
+
+ [Unit]
+ Description=My Sample Service
+ After=multi-user.target
+
+ [Service]
+ Type=idle
+ ExecStart=/usr/bin/python /home/pi/sample.py
+
+ [Install]
+ WantedBy=multi-user.target
+ 
+sudo chmod 644 /lib/systemd/system/sample.service
+```
+configure systemd:
+```
+sudo systemctl daemon-reload
+sudo systemctl enable sample.service
+sudo reboot -n
+
+
+
 ## Install Requirements
 From previous iteration, stpf transfered:
 ```
