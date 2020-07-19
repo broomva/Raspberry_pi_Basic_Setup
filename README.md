@@ -255,6 +255,14 @@ sudo /bin/systemctl start grafana-server
 ```
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh 
+
+docker container run debian
+docker container run -it debian /bin/bash
+
+docker container ls
+docker container ls -a
+docker container rm c55680af670c
+
 ```
 
 ## Install Thingsboard Docker
