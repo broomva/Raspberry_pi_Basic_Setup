@@ -157,9 +157,11 @@ java -version
 
 wget https://github.com/thingsboard/thingsboard/releases/download/v3.0.1/thingsboard-3.0.1.deb
 sudo dpkg -i thingsboard-3.0.1.deb
+```
 
 
-# Configure PostgreSQL
+## Configure PostgreSQL
+```
 # install **wget** if not already installed:
 sudo apt install -y wget
 
@@ -217,6 +219,34 @@ Change MQTT port to 1882
 
 ```
 
+## Configure PostgreSQL to allow remote connection
+```
+# By default PostgreSQL is configured to be bound to “localhost”
+
+netstat -nlt
+# port 5432 is bound to 127.0.0.1. It means any attempt to connect to the postgresql server from outside the machine will be refused.
+
+find / -name "postgresql.conf"
+
+# Open postgresql.conf file and replace line
+
+listen_addresses = 'localhost'
+# with
+
+listen_addresses = '*' # Remove #
+
+# now configure the hba,
+
+find / -name "pg_hba.conf"
+open pg_hba.conf and add following entry at the very end.
+
+host    all             all              0.0.0.0/0                       md5
+host    all             all              ::/0                            md5
+
+
+sudo reboot -n
+netstat -nlt # now service on port 5432 shows open to all 0.0.0.0
+```
 
 ## Intall Nginx 
 
