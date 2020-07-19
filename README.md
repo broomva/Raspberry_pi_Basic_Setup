@@ -1,5 +1,33 @@
 # Raspberry_pi_Basic_Setup
 
+## Enable SSH beforehand
+Create an empty file called ssh in the boot directory. This enables SSH so that you can log in remotely.
+
+The next step is only required if you want the Raspberry Pi to connect to your wireless network. Otherwise, connect the it to your network by using a network cable.
+
+(Optional) Create a file called wpa_supplicant.conf in the boot directory:
+
+ctrl_interface=/var/run/wpa_supplicant
+update_config=1
+country=<Insert 2 letter ISO 3166-1 country code here>
+
+network={
+ ssid="<Name of your WiFi>"
+ psk="<Password for your WiFi>"
+}
+All the necessary files are now on the SD card. Let’s start up the Raspberry Pi.
+
+Eject the SD card and insert it into the SD card slot on the Raspberry Pi.
+Connect the power cable and make sure the LED lights are on.
+Find the IP address of the Raspberry Pi. Usually you can find the address in the control panel for your WiFi router.
+Connect remotely via SSH
+Open up your terminal and enter the following command:
+ssh pi@<ip address>
+SSH warns you that the authenticity of the host can’t be established. Type “yes” to continue connecting.
+When asked for a password, enter the default password: raspberry.
+Once you’re logged in, change the default password:
+passwd
+
 ## Change default password and others
 ```
 raspi-config
@@ -130,6 +158,7 @@ java -version
 wget https://github.com/thingsboard/thingsboard/releases/download/v3.0.1/thingsboard-3.0.1.deb
 sudo dpkg -i thingsboard-3.0.1.deb
 
+
 # Configure PostgreSQL
 # install **wget** if not already installed:
 sudo apt install -y wget
@@ -146,10 +175,15 @@ sudo apt update
 sudo apt -y install postgresql-12
 sudo service postgresql start
 
+# Or
+sudo apt install postgresql libpq-dev postgresql-client postgresql-client-common -y
+
 sudo su - postgres
 psql
 \password
 \q
+
+# Ctrl+D” to return to main user console and connect to the database to create thingsboard DB:
 
 psql -U postgres -d postgres -h 127.0.0.1 -W
 CREATE DATABASE thingsboard;
@@ -184,7 +218,38 @@ Change MQTT port to 1882
 ```
 
 
+## Intall Nginx 
 
+```
+sudo apt-get install nginx
+sudo rm /etc/nginx/sites-enabled/default
+sudo nano /etc/nginx/sites-available/node
+
+server {
+    listen 80;
+    server_name example.com;
+
+    location / {
+        proxy_set_header   X-Forwarded-For $remote_addr;
+        proxy_set_header   Host $http_host;
+        proxy_pass         "http://127.0.0.1:1337";
+    }
+}
+
+sudo ln -s /etc/nginx/sites-available/node /etc/nginx/sites-enabled/node
+sudo service nginx restart
+```
+
+## Install Grafana
+```
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+echo "deb https://packages.grafana.com/oss/deb stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+sudo apt-get update
+sudo apt-get install -y grafana
+sudo /bin/systemctl enable grafana-server
+sudo /bin/systemctl start grafana-server
+# http://<ip address>:3000 admin admin
+```
 
 ## Install Docker
 ```
