@@ -218,6 +218,22 @@ Uncomment ‘# PostgreSQL DAO Configuration’ block. Be sure to update the post
 Change MQTT port to 1882
 
 ```
+After configuring postgresql to thingsboard, install and load demo:
+```
+# --loadDemo option will load demo data: users, devices, assets, rules, widgets.
+sudo /usr/share/thingsboard/bin/install/install.sh --loadDemo
+
+sudo service thingsboard start
+
+sudo systemctl enable thingsboard
+sudo systemctl status thingsboard
+
+/var/log/thingsboard
+cat /var/log/thingsboard/thingsboard.log | grep ERROR
+
+```
+
+```
 
 ## Configure PostgreSQL to allow remote connection
 ```
