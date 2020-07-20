@@ -233,7 +233,6 @@ cat /var/log/thingsboard/thingsboard.log | grep ERROR
 
 ```
 
-```
 
 ## Configure PostgreSQL to allow remote connection
 ```
@@ -284,6 +283,58 @@ server {
 
 sudo ln -s /etc/nginx/sites-available/node /etc/nginx/sites-enabled/node
 sudo service nginx restart
+```
+example:
+```
+sudo nano /etc/nginx/sites-available/node
+
+  GNU nano 2.9.3           /etc/nginx/sites-available/node
+  server {
+    server_name digitalinsa.com www.digitalinsa.com;
+
+    location / {
+        proxy_set_header   X-Forwarded-For $remote_addr;
+        proxy_set_header   Host $http_host;
+        proxy_pass         "http://127.0.0.1:8080";
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    location /grafana {
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header Host $http_host;
+        proxy_pass      "http://127.0.0.1:3000";
+        }
+        
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/digitalinsa.com/fullchain.pem; # mana$
+    ssl_certificate_key /etc/letsencrypt/live/digitalinsa.com/privkey.pem; # ma$
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" $
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Content-Type-Options "nosniff";
+    add_header Referrer-Policy 'strict-origin';
+    }
+    
+    
+    server {
+        if ($host = digitalinsa.com) {
+            return 301 https://$host$request_uri;
+        } # managed by Certbot
+
+        if ($host = www.digitalinsa.com) {
+            return 301 https://$host$request_uri;
+        }
+        
+        listen 80;
+        server_name digitalinsa.com www.digitalinsa.com;
+        return 404; # managed by Certbot
+     }
+
 ```
 
 ## Install Grafana
